@@ -1,0 +1,22 @@
+id: 29752996-e85d-4905-a0e1-a7dcdfcda283
+name: Access from a different country
+description: |
+  'If all of your employees reside in a single country, 
+  then you wouldn't expect logins from other countries.
+  This will enable yoou to detect such threats.'
+requiredDataConnectors:
+  - connectorId: CustomConnector
+    dataTypes:
+      - Slack_Access_Logs_CL
+tactics:
+  - Persistence
+relevantTechniques:
+  - T1098
+query: |
+    let country = "PA"; 
+    let lookback = 1d; 
+    Slack_Access_Logs_CL 
+    | where TimeGenerated > ago(lookback) 
+    | where country_s != country
+    | project ip_s, user_id_s, username_s, country_s
+    | limit 10

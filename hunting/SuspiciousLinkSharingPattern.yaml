@@ -1,0 +1,24 @@
+id: 1218175f-c534-421c-8070-5dcaabf28067
+name: Suspicious link sharing pattern
+description: |
+  'Detect Suspicious Link Sharing Pattern'
+requiredDataConnectors:
+  - connectorId: CustomConnector
+    dataTypes:
+      - Slack_Conversation_Logs_CL
+severity: Low
+queryFrequency: 1d
+queryPeriod: 1d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Persistence
+relevantTechniques:
+  - T1192
+query: |
+    let lookback = 5d;
+    Slack_Conversation_Logs_CL
+    | where TimeGenerated >= ago(lookback)
+    | where text_s matches regex "http(s?):\\/\\/"
+    | project TimeGenerated, MessageID=client_msg_id_g, TeamID=team_s, User=user_s, Text=text_s

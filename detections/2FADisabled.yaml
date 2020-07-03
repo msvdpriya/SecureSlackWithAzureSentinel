@@ -1,0 +1,25 @@
+id: e4779bdc-397a-4b71-be28-59e6a1e1d16b
+name: 2FA Authentication Disabled
+description: |
+  'This alerts when 2FA is disabled in Slack by the user'
+severity: Medium
+requiredDataConnectors:
+  - connectorId: CustomConnector
+    dataTypes:
+      - Slack_User_Logs_CL
+queryFrequency: 1d
+queryPeriod: 1d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Discovery
+relevantTechniques:
+  - T1040
+query: |
+    let lookback = 1d; 
+    Slack_User_Logs_CL 
+    | where TimeGenerated > ago(lookback)
+    | where has_2fa_b == false
+    | project TimeGenerated, Email=email_s, SlackID=id_s, UserName=name_s, Name=real_name_s, TeamId=team_id_s, is2FAEnabled=has_2fa_b
+    | limit 10

@@ -1,0 +1,28 @@
+id: 173f8699-6af5-484a-8b06-8c47ba89b380
+name: Multiple Workspaces deleted by a single user
+description: |
+  'This hunting query identifies where multiple Slack Workspaces have been deleted by a single user in a short timeframe.'
+requiredDataConnectors:
+  - connectorId: CustomConnector
+    dataTypes:
+      - Slack_Audit_Logs_CL
+tactics:
+  - Impact
+relevantTechniques:
+  - T1485
+  - T1489
+query: |
+    let max_delete = 3;
+    let time_window = 1d;
+    let users_performing_delete = (
+    Slack_Audit_Logs_CL 
+    | where TimeGenerated > ago(time_window)
+    | where action_s =~ "workspace_deleted"
+    | summarize count() by actor_user_name_s
+    | where count_ > max_delete
+    | project actor_user_name_s);
+    Slack_Audit_Logs_CL
+    | where TimeGenerated > ago(time_window)
+    | where action_s =~ "workspace_deleted"
+    | where actor_user_name_s in (users_performing_delete)
+    | project actor_user_email_s, actor_user_id_s, actor_user_name_s, entity_scopes_s, context_ip_address_s

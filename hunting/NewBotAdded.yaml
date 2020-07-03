@@ -1,0 +1,22 @@
+id: bf76e508-9282-4cf1-9cc1-5c20c3dea2ee
+name: Previously unseen bot or applicaiton added to Slack Workspace
+description: |
+  'This hunting query helps identify new, and potentially unapproved applications or bots 
+  being added to Slack Workspace.'
+requiredDataConnectors:
+  - connectorId: CustomConnector
+    dataTypes:
+      - Slack_User_Logs_CL
+tactics:
+  - Persistance
+  - Collection
+relevantTechniques:
+  - T1176
+  - T1119
+query: |
+    let lookback = 1d; 
+    Slack_User_Logs_CL 
+    | where TimeGenerated > ago(lookback)
+    | where is_bot_b
+    | project TimeGenerated, email_s, id_s, name_s, real_name_s, team_id_s
+    | limit 10

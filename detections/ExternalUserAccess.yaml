@@ -1,0 +1,22 @@
+id: 8e267e91-6bda-4b3c-bf68-9f5cbdd103a3
+name: External User Access
+description: |
+  'Check if external user has been allowed to join slack team'
+severity: Low
+queryFrequency: 1d
+queryPeriod: 1d
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Persistence
+relevantTechniques:
+  - T1098
+query: |
+    let lookback = 1d; 
+    let organization_domain = "organization.com";
+    Slack_User_Logs_CL 
+    | where TimeGenerated > ago(lookback)
+    | where email_s !endswith organization_domain
+    | project TimeGenerated, email_s, id_s, name_s, real_name_s, team_id_s
+    | limit 10
